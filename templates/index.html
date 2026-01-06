@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Placement Query Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 College Placement Query Chatbot</h1>
+            <p class="subtitle">AI-Powered Placement Assistant with Resume Analytics</p>
+        </header>
+
+        <div class="main-content">
+
+            <!-- Top-level tabs: Chat vs Resume vs Analytics -->
+            <div class="main-tabs">
+                <button class="main-tab active" data-section="chat">💬 Chatbot</button>
+                <button class="main-tab" data-section="resume">📄 Resume Checker</button>
+                <button class="main-tab" data-section="analytics">📊 Visual Analytics</button>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="section chat-section main-section active" data-section="chat">
+                <h2>💬 Chat with Placement Assistant</h2>
+                <div class="chat-container">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="message bot-message">
+                            <div class="message-content">
+                                <strong>Bot:</strong> Hello! I'm your placement assistant. How can I help you today? 
+                                You can ask about eligibility criteria, company information, required skills, 
+                                interview preparation tips, or placement statistics.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input" placeholder="Type your query here..." class="chat-input">
+                        <button id="send-btn" class="send-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Upload Section -->
+            <div class="section resume-section main-section" data-section="resume" style="display:none;">
+                <h2>📄 Resume Text Analytics</h2>
+                <div class="upload-container">
+                    <div class="upload-options">
+                        <div class="upload-tab active" data-tab="file">Upload File</div>
+                        <div class="upload-tab" data-tab="text">Paste Text</div>
+                    </div>
+                    
+                    <div id="file-upload" class="upload-content active">
+                        <input type="file" id="resume-file" accept=".pdf,.doc,.docx,.txt" class="file-input">
+                        <label for="resume-file" class="file-label">
+                            <span>📎 Choose Resume File (PDF, DOC, DOCX, TXT)</span>
+                        </label>
+                        <button id="analyze-file-btn" class="analyze-btn" disabled>Analyze Resume</button>
+                    </div>
+                    
+                    <div id="text-upload" class="upload-content">
+                        <textarea id="resume-text" placeholder="Paste your resume text here..." class="resume-textarea"></textarea>
+                        <button id="analyze-text-btn" class="analyze-btn">Analyze Resume</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section (summary) -->
+            <div id="results-section" class="section results-section" style="display: none;">
+                <h2>📊 Analysis Results</h2>
+                <div id="results-content"></div>
+            </div>
+
+            <!-- Analytics Section (charts + explanations) -->
+            <div class="section analytics-section main-section" data-section="analytics" style="display:none;">
+                <h2>📊 Visual Analytics Dashboard</h2>
+                <p class="analytics-subtitle">
+                    Once you analyze a resume, this tab will show clear visual summaries of your skills,
+                    gaps, and overall readiness – with short explanations for each chart.
+                </p>
+                <div id="analytics-empty" class="analytics-empty">
+                    Analyze a resume first to unlock your personalized visual analytics.
+                </div>
+                <div id="analytics-content" class="analytics-content" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+
