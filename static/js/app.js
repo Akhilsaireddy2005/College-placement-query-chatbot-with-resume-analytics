@@ -166,8 +166,10 @@ analyzeTextBtn.addEventListener('click', () => {
 });
 
 function analyzeResume(data, type) {
-    resultsSection.style.display = 'block';
-    resultsContent.innerHTML = '<div class="loading">Analyzing resume... Please wait.</div>';
+    if (analyticsEmpty) {
+        analyticsEmpty.style.display = 'block';
+        analyticsEmpty.innerHTML = '<div class="loading">Analyzing resume... Please wait.</div>';
+    }
     
     const url = type === 'file' ? '/upload_resume' : '/analyze_text';
     const options = {
@@ -180,112 +182,32 @@ function analyzeResume(data, type) {
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                resultsContent.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                if (analyticsEmpty) {
+                    analyticsEmpty.style.display = 'block';
+                    analyticsEmpty.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                }
                 return;
             }
 
             lastAnalysis = data.analysis;
             lastVisualizations = data.visualizations || {};
             
-            displayResults(lastAnalysis, lastVisualizations);
+            // Only use the Visual Analytics tab for displaying results
             updateAnalyticsTab(lastAnalysis, lastVisualizations);
         })
         .catch(error => {
-            resultsContent.innerHTML = `<div class="error">Error analyzing resume: ${error.message}</div>`;
+            if (analyticsEmpty) {
+                analyticsEmpty.style.display = 'block';
+                analyticsEmpty.innerHTML = `<div class="error">Error analyzing resume: ${error.message}</div>`;
+            }
             console.error('Error:', error);
         });
 }
 
 function displayResults(analysis, visualizations) {
-    let html = '';
-    
-    // Readiness Score
-    html += `
-        <div class="result-card">
-            <h3>📊 Resume Readiness Score</h3>
-            <div class="score-display">${analysis.readiness_score.toFixed(1)}/100</div>
-        </div>
-    `;
-    
-    // Domain Classification
-    html += `
-        <div class="result-card">
-            <h3>🎯 Domain Classification</h3>
-            <div class="result-item">
-                <strong>Primary Domain:</strong> ${analysis.domain}
-                <br><small>Confidence: ${(analysis.domain_confidence * 100).toFixed(1)}%</small>
-            </div>
-        </div>
-    `;
-    
-    // Technical Skills
-    if (analysis.technical_skills && analysis.technical_skills.length > 0) {
-        html += `
-            <div class="result-card">
-                <h3>💻 Technical Skills</h3>
-                <div class="result-item">
-                    ${analysis.technical_skills.map(skill => 
-                        `<span class="skill-tag">${skill}</span>`
-                    ).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    // Soft Skills
-    if (analysis.soft_skills && analysis.soft_skills.length > 0) {
-        html += `
-            <div class="result-card">
-                <h3>🤝 Soft Skills</h3>
-                <div class="result-item">
-                    ${analysis.soft_skills.map(skill => 
-                        `<span class="skill-tag">${skill}</span>`
-                    ).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    // Recommended Roles
-    if (analysis.recommended_roles && analysis.recommended_roles.length > 0) {
-        html += `
-            <div class="result-card">
-                <h3>🎯 Recommended Job Roles</h3>
-                <div class="result-item">
-                    <ul style="list-style: none; padding: 0;">
-                        ${analysis.recommended_roles.map(role => 
-                            `<li style="padding: 8px; margin: 5px 0; background: white; border-radius: 5px;">✓ ${role}</li>`
-                        ).join('')}
-                    </ul>
-                </div>
-            </div>
-        `;
-    }
-    
-    // Skill Gaps
-    if (analysis.skill_gaps && analysis.skill_gaps.length > 0) {
-        html += `
-            <div class="result-card">
-                <h3>⚠️ Skill Gaps</h3>
-                <div class="result-item">
-                    <strong>Missing Skills for ${analysis.domain}:</strong>
-                    <div style="margin-top: 10px;">
-                        ${analysis.skill_gaps.map(gap => 
-                            `<span class="skill-tag gap-tag">${gap}</span>`
-                        ).join('')}
-                    </div>
-                    <p style="margin-top: 10px; color: #666;">
-                        Skill Coverage: ${(analysis.skill_coverage * 100).toFixed(1)}%
-                    </p>
-                </div>
-            </div>
-        `;
-    }
-    
-    resultsContent.innerHTML = html;
-    
-    // Scroll to results
-    resultsSection.scrollIntoView({ behavior: 'smooth' });
+    // Kept for compatibility; results are now shown only in the Visual Analytics tab.
+    // This function intentionally does nothing so that the “Analysis Results” block stays hidden.
+    return;
 }
 
 // Populate the Analytics tab with charts + explanations
@@ -303,6 +225,45 @@ function updateAnalyticsTab(analysis, visualizations) {
     analyticsContent.style.display = 'grid';
 
     let html = '';
+
+    // High-level summary cards (score, domain, roles)
+    const score = analysis.readiness_score?.toFixed
+        ? analysis.readiness_score.toFixed(1)
+        : analysis.readiness_score;
+
+    html += `
+        <div class="analytics-card">
+            <div class="analytics-card-header">Overall Readiness Score</div>
+            <div class="analytics-card-body">
+                <div class="score-display" style="margin: 0 0 12px 0;">${score}/100</div>
+                <p class="analytics-explanation">
+                    This score combines skills, domain match, and resume length/quality.
+                    Aim for <strong>70+</strong> for strong placement readiness; anything below
+                    that is a signal to add projects, strengthen skills, or refine your resume wording.
+                </p>
+            </div>
+        </div>
+    `;
+
+    html += `
+        <div class="analytics-card">
+            <div class="analytics-card-header">Domain & Recommended Roles</div>
+            <div class="analytics-card-body">
+                <p class="analytics-explanation" style="margin-bottom: 8px;">
+                    Detected primary domain: <strong>${analysis.domain}</strong><br/>
+                    Confidence: <strong>${(analysis.domain_confidence * 100).toFixed(1)}%</strong>
+                </p>
+                <p class="analytics-explanation">
+                    Suggested roles that best fit your current profile:
+                </p>
+                <ul style="list-style:none; padding-left:0; margin-top:6px;">
+                    ${(analysis.recommended_roles || []).map(
+                        role => `<li>• ${role}</li>`
+                    ).join('')}
+                </ul>
+            </div>
+        </div>
+    `;
 
     // Skill frequency chart
     if (visualizations.skill_frequency) {
@@ -361,5 +322,28 @@ function updateAnalyticsTab(analysis, visualizations) {
     }
 
     analyticsContent.innerHTML = html;
+
+    // Automatically switch to the Analytics main tab so the user sees results
+    const analyticsTab = Array.from(mainTabs || []).find(
+        t => t.getAttribute('data-section') === 'analytics'
+    );
+    const analyticsSection = Array.from(mainSections || []).find(
+        s => s.getAttribute('data-section') === 'analytics'
+    );
+    if (analyticsTab && analyticsSection) {
+        mainTabs.forEach(t => t.classList.remove('active'));
+        analyticsTab.classList.add('active');
+
+        mainSections.forEach(section => {
+            if (section === analyticsSection) {
+                section.style.display = '';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+
+        // Scroll analytics section into view
+        analyticsSection.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
