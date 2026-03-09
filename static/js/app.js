@@ -20,6 +20,27 @@ mainTabs.forEach(tab => {
                 section.style.display = 'none';
             }
         });
+
+        // Hide resume results & analytics when user is on Chat tab
+        if (typeof resultsSection !== 'undefined' && resultsSection) {
+            if (target === 'chat') {
+                resultsSection.style.display = 'none';
+                if (analyticsContent) {
+                    analyticsContent.style.display = 'none';
+                }
+                if (analyticsEmpty) {
+                    analyticsEmpty.style.display = 'block';
+                }
+            } else if (target === 'resume' && lastAnalysis) {
+                // Resume tab: show summary results when we already have analysis
+                resultsSection.style.display = 'block';
+            } else if (target === 'analytics' && lastAnalysis) {
+                // Analytics tab: make sure analytics content is visible
+                resultsSection.style.display = 'none';
+                analyticsEmpty.style.display = lastVisualizations && Object.keys(lastVisualizations).length ? 'none' : 'block';
+                analyticsContent.style.display = lastVisualizations && Object.keys(lastVisualizations).length ? 'grid' : 'none';
+            }
+        }
     });
 });
 

@@ -42,7 +42,7 @@
                 </div>
             </div>
 
-            <!-- Resume Upload Section -->
+            <!-- Resume Upload Section + Results (only in Resume tab) -->
             <div class="section resume-section main-section" data-section="resume" style="display:none;">
                 <h2>📄 Resume Text Analytics</h2>
                 <div class="upload-container">
@@ -64,12 +64,12 @@
                         <button id="analyze-text-btn" class="analyze-btn">Analyze Resume</button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Results Section (summary) -->
-            <div id="results-section" class="section results-section" style="display: none;">
-                <h2>📊 Analysis Results</h2>
-                <div id="results-content"></div>
+                <!-- Results Section (summary) - visible only inside Resume tab -->
+                <div id="results-section" class="section results-section" style="display: none; margin-top: 25px;">
+                    <h2>📊 Analysis Results</h2>
+                    <div id="results-content"></div>
+                </div>
             </div>
 
             <!-- Analytics Section (charts + explanations) -->

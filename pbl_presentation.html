@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBL Presentation – College Placement Chatbot</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a0a0f;color:#e2e8f0;overflow:hidden}
+.slides{width:100vw;height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px;opacity:0;pointer-events:none;transition:opacity .5s ease,transform .5s ease;transform:translateX(60px)}
+.slide.active{opacity:1;pointer-events:all;transform:translateX(0)}
+.slide.prev{transform:translateX(-60px)}
+
+/* Background blobs */
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3;pointer-events:none}
+.blob1{width:500px;height:500px;background:radial-gradient(circle,#6366f1,#8b5cf6);top:-100px;right:-100px}
+.blob2{width:400px;height:400px;background:radial-gradient(circle,#06b6d4,#3b82f6);bottom:-100px;left:-100px}
+
+/* Nav */
+nav{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);padding:12px 24px;border-radius:50px;z-index:100}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:.3s}
+.dot.active{background:#818cf8;transform:scale(1.4)}
+.nav-btn{background:rgba(255,255,255,.1);border:none;color:#fff;padding:8px 20px;border-radius:30px;cursor:pointer;font-size:14px;font-family:inherit;transition:.3s}
+.nav-btn:hover{background:#6366f1}
+.slide-counter{font-size:13px;color:#94a3b8;min-width:50px;text-align:center}
+
+/* Slide 1 – Title */
+#s1{background:linear-gradient(135deg,#0a0a0f 0%,#0f0a1e 100%)}
+#s1 .title{font-size:clamp(36px,5vw,64px);font-weight:900;background:linear-gradient(135deg,#818cf8,#c084fc,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;line-height:1.1;margin-bottom:20px}
+#s1 .sub{font-size:clamp(16px,2vw,22px);color:#94a3b8;text-align:center;max-width:700px;margin-bottom:40px}
+#s1 .badges{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.badge{padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid}
+.badge.blue{background:rgba(99,102,241,.15);border-color:#6366f1;color:#818cf8}
+.badge.purple{background:rgba(168,85,247,.15);border-color:#a855f7;color:#c084fc}
+.badge.cyan{background:rgba(6,182,212,.15);border-color:#06b6d4;color:#22d3ee}
+
+/* Section header */
+.sec-tag{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#6366f1;margin-bottom:14px}
+.slide-title{font-size:clamp(28px,4vw,48px);font-weight:800;line-height:1.2;margin-bottom:32px}
+.grad{background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Cards grid */
+.grid{display:grid;gap:20px;width:100%;max-width:1000px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px;transition:.3s;position:relative;overflow:hidden}
+.card:hover{border-color:#6366f1;transform:translateY(-4px);background:rgba(99,102,241,.1)}
+.card-icon{font-size:32px;margin-bottom:12px}
+.card h3{font-size:16px;font-weight:700;margin-bottom:8px;color:#e2e8f0}
+.card p,.card li{font-size:14px;color:#94a3b8;line-height:1.7}
+.card ul{list-style:none;padding:0}
+.card li::before{content:"›";color:#6366f1;margin-right:8px;font-weight:700}
+
+/* Flow / pipeline */
+.flow{display:flex;align-items:center;gap:0;justify-content:center;flex-wrap:wrap;width:100%;max-width:900px}
+.flow-box{background:rgba(99,102,241,.15);border:1px solid #6366f1;border-radius:12px;padding:14px 20px;font-size:13px;font-weight:600;color:#818cf8;text-align:center;min-width:120px}
+.flow-arr{color:#6366f1;font-size:20px;margin:0 8px}
+
+/* Tech stack */
+.tech-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:900px}
+.tech{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;color:#cbd5e1}
+.tech span{display:inline-block;margin-right:6px}
+
+/* Arch boxes */
+.arch{display:flex;gap:16px;width:100%;max-width:1000px;align-items:stretch}
+.arch-layer{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:20px;text-align:center}
+.arch-layer h3{font-size:14px;font-weight:700;color:#818cf8;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.arch-layer p{font-size:13px;color:#94a3b8;line-height:1.8}
+.layer-icon{font-size:28px;margin-bottom:10px}
+
+/* CNN viz */
+.cnn{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;max-width:900px}
+.cnn-block{border-radius:10px;padding:12px 16px;font-size:12px;font-weight:700;text-align:center;min-width:90px}
+.b1{background:rgba(99,102,241,.3);border:1px solid #6366f1;color:#a5b4fc}
+.b2{background:rgba(168,85,247,.3);border:1px solid #a855f7;color:#d8b4fe}
+.b3{background:rgba(59,130,246,.3);border:1px solid #3b82f6;color:#93c5fd}
+.b4{background:rgba(16,185,129,.3);border:1px solid #10b981;color:#6ee7b7}
+
+/* Metrics */
+.metric{text-align:center}
+.metric .num{font-size:clamp(36px,5vw,56px);font-weight:900;background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric .label{font-size:14px;color:#94a3b8;margin-top:4px}
+
+/* Timeline */
+.timeline{display:flex;flex-direction:column;gap:16px;width:100%;max-width:750px}
+.titem{display:flex;gap:16px;align-items:flex-start}
+.tnum{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.ttext h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.ttext p{font-size:13px;color:#94a3b8}
+
+/* Future */
+.fut-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;display:flex;gap:14px;align-items:flex-start}
+.fut-icon{font-size:28px;flex-shrink:0}
+.fut-card h4{font-size:15px;font-weight:700;margin-bottom:6px}
+.fut-card p{font-size:13px;color:#94a3b8;line-height:1.7}
+
+/* Thank you slide */
+#s9 .big{font-size:clamp(48px,8vw,96px);font-weight:900;line-height:1;background:linear-gradient(135deg,#818cf8,#c084fc,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+
+.wide{max-width:1100px;width:100%}
+</style>
+</head>
+<body>
+<div class="slides">
+
+<!-- SLIDE 1: Title -->
+<div class="slide active" id="s1">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">PBL Presentation · 2025–26</p>
+  <h1 class="title">College Placement Query<br>Chatbot with Resume Analytics</h1>
+  <p class="sub">An end-to-end AI system combining NLP, CNN-based Deep Learning &amp; Text Analytics to guide students through campus placements</p>
+  <div class="badges">
+    <span class="badge blue">🧠 Deep Learning</span>
+    <span class="badge purple">💬 NLP Chatbot</span>
+    <span class="badge cyan">📄 Resume Analytics</span>
+    <span class="badge blue">🌐 Flask Web App</span>
+  </div>
+</div>
+
+<!-- SLIDE 2: Problem Statement -->
+<div class="slide" id="s2">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">Problem Statement</p>
+  <h2 class="slide-title">Why This Project?</h2>
+  <div class="grid g2" style="max-width:860px">
+    <div class="card"><div class="card-icon">😕</div><h3>Information Overload</h3><p>Students struggle to find placement info — eligibility, timelines, company requirements — scattered across notices &amp; emails.</p></div>
+    <div class="card"><div class="card-icon">📋</div><h3>Resume Blind Spots</h3><p>Students lack feedback on skill gaps, domain fit, and how their resume compares to real job requirements.</p></div>
+    <div class="card"><div class="card-icon">⏰</div><h3>No 24/7 Guidance</h3><p>Placement cells are unavailable after hours. Students need instant, accurate answers during peak preparation time.</p></div>
+    <div class="card"><div class="card-icon">🎯</div><h3>Our Solution</h3><p>An intelligent chatbot + automated resume analyser that provides real-time placement guidance and skill gap analysis.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 3: Objectives -->
+<div class="slide" id="s3">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">Project Objectives</p>
+  <h2 class="slide-title">What We <span class="grad">Built</span></h2>
+  <div class="grid g3" style="max-width:900px">
+    <div class="card"><div class="card-icon">💬</div><h3>Intent-Aware Chatbot</h3><ul><li>Placement eligibility queries</li><li>Company-specific info</li><li>Skill requirements</li><li>Preparation tips</li></ul></div>
+    <div class="card"><div class="card-icon">📑</div><h3>Resume Analytics</h3><ul><li>Upload PDF / DOC / TXT</li><li>Auto skill extraction</li><li>Domain classification</li><li>Readiness score (0–100)</li></ul></div>
+    <div class="card"><div class="card-icon">📊</div><h3>Visual Dashboard</h3><ul><li>Skill frequency charts</li><li>Skill gap analysis</li><li>Word cloud generation</li><li>Role recommendations</li></ul></div>
+  </div>
+</div>
+
+<!-- SLIDE 4: System Architecture -->
+<div class="slide" id="s4">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">System Design</p>
+  <h2 class="slide-title">Architecture Overview</h2>
+  <div class="arch wide" style="max-width:980px">
+    <div class="arch-layer"><div class="layer-icon">🌐</div><h3>Frontend</h3><p>Flask Templates<br>HTML / CSS / JS<br>Chat Interface<br>Resume Upload UI<br>Analytics Display</p></div>
+    <div class="arch-layer"><div class="layer-icon">⚙️</div><h3>Backend (Flask)</h3><p>REST API Endpoints<br>/chat<br>/upload_resume<br>/analyze_text<br>Session &amp; File Mgmt</p></div>
+    <div class="arch-layer"><div class="layer-icon">🧠</div><h3>AI / ML Core</h3><p>CNN Intent Classifier<br>CNN Resume Classifier<br>Word2Vec Embeddings<br>spaCy NLP Pipeline<br>NLTK Processing</p></div>
+    <div class="arch-layer"><div class="layer-icon">📊</div><h3>Analytics</h3><p>Skill Extraction<br>Gap Analysis<br>Matplotlib Charts<br>Seaborn Plots<br>WordCloud</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 5: Data Flow -->
+<div class="slide" id="s5">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">How It Works</p>
+  <h2 class="slide-title">Data Flow Pipelines</h2>
+  <div style="display:flex;flex-direction:column;gap:32px;align-items:center">
+    <div>
+      <p style="font-size:13px;color:#6366f1;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;text-align:center">Chat Query Flow</p>
+      <div class="flow">
+        <div class="flow-box">User Query</div><div class="flow-arr">→</div>
+        <div class="flow-box">NLP Preprocessing</div><div class="flow-arr">→</div>
+        <div class="flow-box">CNN Intent<br>Classifier</div><div class="flow-arr">→</div>
+        <div class="flow-box">Response<br>Generator</div><div class="flow-arr">→</div>
+        <div class="flow-box">Answer to User</div>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:13px;color:#a855f7;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;text-align:center">Resume Analysis Flow</p>
+      <div class="flow">
+        <div class="flow-box">Resume Upload</div><div class="flow-arr">→</div>
+        <div class="flow-box">Text Extraction<br>(PyPDF2 / docx)</div><div class="flow-arr">→</div>
+        <div class="flow-box">Skill Extraction<br>+ CNN Domain</div><div class="flow-arr">→</div>
+        <div class="flow-box">Gap Analysis<br>+ Readiness Score</div><div class="flow-arr">→</div>
+        <div class="flow-box">Charts &amp;<br>Report</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: CNN Model -->
+<div class="slide" id="s6">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">Deep Learning Model</p>
+  <h2 class="slide-title">CNN Architecture</h2>
+  <div style="display:flex;flex-direction:column;gap:24px;align-items:center;width:100%;max-width:900px">
+    <div class="cnn">
+      <div class="cnn-block b1">Input Layer<br><small>Word Indices</small></div>
+      <div class="flow-arr">→</div>
+      <div class="cnn-block b1">Embedding Layer<br><small>Word2Vec 100-dim</small></div>
+      <div class="flow-arr">→</div>
+      <div class="cnn-block b2">Conv1D × 3<br><small>filters: 3,4,5</small></div>
+      <div class="flow-arr">→</div>
+      <div class="cnn-block b3">GlobalMaxPool<br><small>+ Concatenate</small></div>
+      <div class="flow-arr">→</div>
+      <div class="cnn-block b4">Dense(128)<br>Dropout(0.5)</div>
+      <div class="flow-arr">→</div>
+      <div class="cnn-block b4">Softmax Output<br><small>7 Intents</small></div>
+    </div>
+    <div class="grid g3" style="width:100%">
+      <div class="card" style="text-align:center"><div class="metric"><div class="num">7</div><div class="label">Intent Classes</div></div><p style="font-size:12px;margin-top:8px">eligibility · company_info · skill_requirements · preparation · statistics · greeting · goodbye</p></div>
+      <div class="card" style="text-align:center"><div class="metric"><div class="num">4</div><div class="label">Job Domains</div></div><p style="font-size:12px;margin-top:8px">Web Dev · Data Science · AI/ML · Core Engineering</p></div>
+      <div class="card" style="text-align:center"><div class="metric"><div class="num">80–90<small style="font-size:24px">%</small></div><div class="label">Expected Accuracy</div></div><p style="font-size:12px;margin-top:8px">Trained with 100+ labeled examples per class</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Tech Stack -->
+<div class="slide" id="s7">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">Technologies</p>
+  <h2 class="slide-title">Tech Stack</h2>
+  <div style="display:flex;flex-direction:column;gap:20px;align-items:center;width:100%;max-width:900px">
+    <div class="grid g4" style="width:100%">
+      <div class="card"><div class="card-icon">🧠</div><h3>Deep Learning</h3><p>TensorFlow 2.15<br>Keras CNN<br>PyTorch</p></div>
+      <div class="card"><div class="card-icon">📝</div><h3>NLP</h3><p>NLTK 3.8<br>spaCy 3.7<br>Gensim Word2Vec</p></div>
+      <div class="card"><div class="card-icon">🌐</div><h3>Web</h3><p>Flask 3.0<br>Werkzeug<br>HTML/CSS/JS</p></div>
+      <div class="card"><div class="card-icon">📊</div><h3>Analytics</h3><p>Matplotlib<br>Seaborn<br>WordCloud</p></div>
+    </div>
+    <div class="tech-row">
+      <div class="tech"><span>📄</span>PyPDF2</div>
+      <div class="tech"><span>📝</span>python-docx</div>
+      <div class="tech"><span>🔢</span>NumPy 1.26</div>
+      <div class="tech"><span>🐼</span>Pandas</div>
+      <div class="tech"><span>🔬</span>scikit-learn</div>
+      <div class="tech"><span>🌐</span>REST API</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: Future Enhancements -->
+<div class="slide" id="s8">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">Future Scope</p>
+  <h2 class="slide-title">What's Next?</h2>
+  <div style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:780px">
+    <div class="fut-card"><div class="fut-icon">🤖</div><div><h4>BERT / Transformer Embeddings</h4><p>Replace Word2Vec with pre-trained BERT/GPT embeddings for significantly improved intent understanding and context awareness.</p></div></div>
+    <div class="fut-card"><div class="fut-icon">🔍</div><div><h4>Named Entity Recognition (NER)</h4><p>Use spaCy NER to extract names, organisations, certifications and education details automatically from resumes.</p></div></div>
+    <div class="fut-card"><div class="fut-icon">💬</div><div><h4>Multi-Turn Conversations</h4><p>Add session memory to support multi-turn dialogue, enabling follow-up questions and personalised conversations.</p></div></div>
+    <div class="fut-card"><div class="fut-icon">📱</div><div><h4>Mobile App &amp; Interview Prep Module</h4><p>React Native app + AI-generated interview questions tailored to the student's resume domain and target company.</p></div></div>
+  </div>
+</div>
+
+<!-- SLIDE 9: Thank You -->
+<div class="slide" id="s9">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <p class="sec-tag">PBL Presentation · College Placement Chatbot</p>
+  <div class="big">Thank You!</div>
+  <p style="font-size:18px;color:#94a3b8;margin-top:24px;text-align:center">CNN · NLP · Flask · Resume Analytics</p>
+  <div class="badges" style="margin-top:32px">
+    <span class="badge blue">🌐 localhost:5000</span>
+    <span class="badge purple">🎓 For Educational Use</span>
+  </div>
+  <p style="font-size:14px;color:#475569;margin-top:40px">Questions? Let's discuss! 💬</p>
+</div>
+
+</div><!-- /slides -->
+
+<!-- Navigation -->
+<nav>
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Prev</button>
+  <div id="dots"></div>
+  <div class="slide-counter" id="counter">1 / 9</div>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+</nav>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const dotsEl = document.getElementById('dots');
+const counter = document.getElementById('counter');
+let cur = 0;
+
+// Build dots
+slides.forEach((_,i)=>{
+  const d = document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n){
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('prev');
+  setTimeout(()=>slides[cur].classList.remove('prev'),500);
+  cur=n;
+  slides.forEach((s,i)=>{s.classList.toggle('active',i===cur)});
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===cur));
+  counter.textContent=`${cur+1} / ${slides.length}`;
+}
+
+function changeSlide(dir){
+  const next=(cur+dir+slides.length)%slides.length;
+  goTo(next);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') changeSlide(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') changeSlide(-1);
+});
+</script>
+</body>
+</html>

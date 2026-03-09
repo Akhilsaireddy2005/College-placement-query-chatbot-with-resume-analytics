@@ -32,33 +32,21 @@ class ResumeAnalytics:
     def extract_technical_skills(self, resume_text):
         """
         Extract technical skills from resume text
-        
-        Args:
-            resume_text: Resume text string
-        
-        Returns:
-            List of found technical skills
         """
         text_lower = resume_text.lower()
         found_skills = []
         
         for skill in TECHNICAL_SKILLS:
-            # Check for exact match or word boundary match
             pattern = r'\b' + re.escape(skill.lower()) + r'\b'
             if re.search(pattern, text_lower):
                 found_skills.append(skill)
         
-        return list(set(found_skills))  # Remove duplicates
+        # Return unique, sorted for consistency
+        return sorted(list(set(found_skills)))
     
     def extract_soft_skills(self, resume_text):
         """
         Extract soft skills from resume text
-        
-        Args:
-            resume_text: Resume text string
-        
-        Returns:
-            List of found soft skills
         """
         text_lower = resume_text.lower()
         found_skills = []
@@ -68,24 +56,24 @@ class ResumeAnalytics:
             if re.search(pattern, text_lower):
                 found_skills.append(skill.title())
         
-        return list(set(found_skills))
+        return sorted(list(set(found_skills)))
     
     def classify_domain(self, resume_text):
         """
-        Classify resume into job domain
-        
-        Args:
-            resume_text: Resume text string
-        
-        Returns:
-            Domain classification result
+        Classify resume into job domain with confidence fallback
         """
+        # If model not initialized, use keyword scoring
         if not self.initialized:
-            # Fallback to keyword-based classification
             return self._keyword_based_classification(resume_text)
         
         try:
             domain, confidence = self.resume_classifier.predict(resume_text)
+            # If model confidence is low, blend with keyword fallback
+            if confidence < 0.45:
+                keyword_result = self._keyword_based_classification(resume_text)
+                # Pick the higher-confidence result
+                if keyword_result['confidence'] > confidence:
+                    return keyword_result
             return {
                 'domain': domain,
                 'confidence': confidence
@@ -95,39 +83,39 @@ class ResumeAnalytics:
             return self._keyword_based_classification(resume_text)
     
     def _keyword_based_classification(self, resume_text):
-        """Fallback keyword-based domain classification"""
+        """Fallback keyword-based domain classification with weighted scores"""
         text_lower = resume_text.lower()
         domain_scores = {}
         
-        # Web Development keywords
-        web_keywords = ['html', 'css', 'javascript', 'react', 'angular', 'vue', 'node', 'web', 'frontend', 'backend']
-        web_score = sum(1 for keyword in web_keywords if keyword in text_lower)
-        domain_scores['Web Development'] = web_score
+        keyword_map = {
+            'Web Development': {
+                'keywords': ['html', 'css', 'javascript', 'react', 'angular', 'vue', 'node', 'web', 'frontend', 'backend', 'django', 'flask'],
+                'weight': 1.0
+            },
+            'Data Science': {
+                'keywords': ['data science', 'data analysis', 'pandas', 'numpy', 'statistics', 'sql', 'tableau', 'power bi', 'matplotlib', 'seaborn'],
+                'weight': 1.05
+            },
+            'AI/ML': {
+                'keywords': ['machine learning', 'deep learning', 'neural network', 'tensorflow', 'pytorch', 'nlp', 'ai', 'ml', 'transformer', 'bert', 'gpt'],
+                'weight': 1.1
+            },
+            'Core Engineering': {
+                'keywords': ['engineering', 'mechanical', 'electrical', 'civil', 'core', 'embedded', 'vlsi'],
+                'weight': 0.95
+            }
+        }
         
-        # Data Science keywords
-        ds_keywords = ['data science', 'data analysis', 'pandas', 'numpy', 'statistics', 'sql', 'tableau', 'power bi']
-        ds_score = sum(1 for keyword in ds_keywords if keyword in text_lower)
-        domain_scores['Data Science'] = ds_score
+        for domain, cfg in keyword_map.items():
+            hits = sum(1 for keyword in cfg['keywords'] if keyword in text_lower)
+            domain_scores[domain] = hits * cfg['weight']
         
-        # AI/ML keywords
-        ai_keywords = ['machine learning', 'deep learning', 'neural network', 'tensorflow', 'pytorch', 'nlp', 'ai', 'ml']
-        ai_score = sum(1 for keyword in ai_keywords if keyword in text_lower)
-        domain_scores['AI/ML'] = ai_score
-        
-        # Core Engineering keywords
-        core_keywords = ['engineering', 'mechanical', 'electrical', 'civil', 'core']
-        core_score = sum(1 for keyword in core_keywords if keyword in text_lower)
-        domain_scores['Core Engineering'] = core_score
-        
-        if max(domain_scores.values()) > 0:
-            domain = max(domain_scores, key=domain_scores.get)
-            confidence = min(domain_scores[domain] / 5.0, 1.0)  # Normalize confidence
-        else:
-            domain = 'Core Engineering'  # Default
-            confidence = 0.3
+        top_domain = max(domain_scores, key=domain_scores.get)
+        top_score = domain_scores[top_domain]
+        confidence = min(top_score / 6.0, 1.0) if top_score > 0 else 0.25
         
         return {
-            'domain': domain,
+            'domain': top_domain,
             'confidence': confidence
         }
     
@@ -145,10 +133,9 @@ class ResumeAnalytics:
         found_skills = self.extract_technical_skills(resume_text)
         found_skills_lower = [s.lower() for s in found_skills]
         
-        # Domain-specific required skills
         domain_requirements = {
             'Web Development': ['html', 'css', 'javascript', 'react', 'node.js', 'sql', 'git'],
-            'Data Science': ['python', 'sql', 'pandas', 'numpy', 'machine learning', 'data analysis'],
+            'Data Science': ['python', 'sql', 'pandas', 'numpy', 'statistics', 'machine learning', 'data analysis'],
             'AI/ML': ['python', 'tensorflow', 'pytorch', 'machine learning', 'deep learning', 'nlp'],
             'Core Engineering': ['problem solving', 'technical knowledge', 'project experience']
         }
@@ -156,14 +143,14 @@ class ResumeAnalytics:
         required_skills = domain_requirements.get(target_domain, [])
         required_skills_lower = [s.lower() for s in required_skills]
         
-        # Find gaps
         gaps = [skill for skill in required_skills_lower if skill not in found_skills_lower]
+        coverage = (len(required_skills_lower) - len(gaps)) / len(required_skills_lower) if required_skills_lower else 0
         
         return {
             'required_skills': required_skills,
             'found_skills': found_skills,
             'gaps': gaps,
-            'coverage': len(found_skills) / len(required_skills) if required_skills else 0
+            'coverage': coverage
         }
     
     def recommend_job_roles(self, resume_text):
@@ -268,17 +255,17 @@ class ResumeAnalytics:
         technical_skills = self.extract_technical_skills(resume_text)
         soft_skills = self.extract_soft_skills(resume_text)
         
-        # Classify domain
+        # Classify domain with fallback
         domain_result = self.classify_domain(resume_text)
         
         # Recommend roles
         role_recommendations = self.recommend_job_roles(resume_text)
         
-        # Calculate readiness
-        readiness_score = self.calculate_readiness_score(resume_text, domain_result['domain'])
-        
         # Identify gaps
         skill_gaps = self.identify_skill_gaps(resume_text, domain_result['domain'])
+        
+        # Calculate readiness
+        readiness_score = self.calculate_readiness_score(resume_text, domain_result['domain'])
         
         return {
             'technical_skills': technical_skills,
